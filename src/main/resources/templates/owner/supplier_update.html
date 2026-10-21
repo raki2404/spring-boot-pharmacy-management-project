@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Update Supplier</title>
+    </head>
+    <body>
+        <h1>Update Supplier</h1>
+        <form th:action="@{/owner/supplier/update}" method="post" th:object="${supplier}">
+            <input type="hidden" th:field="*{sup_id}" />
+
+            <label for="name">Name:</label>
+            <input type="text" id="name" th:field="*{name}" required/><br/>
+
+            <label for="address">Address:</label>
+            <input type="text" id="address" th:field="*{address}" required/><br/>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" th:field="*{email}" required/><br/>
+
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" th:field="*{phone}" required/><br/>
+            
+            <input type="submit" value="Update Supplier">
+        </form>
+        <button onclick="back()">Back</button>
+    </body>
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/owner/suppliers");
+        }
+
+    </script>
+</html>

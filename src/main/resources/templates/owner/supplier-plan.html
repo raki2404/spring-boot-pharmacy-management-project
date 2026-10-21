@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Sponsor Plan</title>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>Current Plan -</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Medicine</th>
+                    <th>Company</th>
+                    <th>Time Till Expiry</th>
+                    <th>Recurring (days)</th>
+                    <th>Last Update Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody class="plan-body">
+                <tr th:each="plan : ${supplierPlan}">
+                    <td th:text="${plan.name}"></td>
+                    <td th:text="${plan.company}"></td>
+                    <td th:text="${plan.time_till_expiry}"></td>
+                    <td th:text="${plan.recurring}"></td>
+                    <td th:text="${plan.last_update_date}"></td>
+                    <td class="status"></td>
+                    <td th:attr="data-medid=${plan.med_id}, data-supid=${plan.sup_id}"><button onclick="plan_delete(this)">❌</button></td>
+                    <td th:attr="data-medid=${plan.med_id}, data-supid=${plan.sup_id}"><button onclick="plan_date_update(this)">🔄</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h1>Add to Plan -</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Medicine</th>
+                    <th>Company</th>
+                    <th>Time Till Expiry</th>
+                    <th>Recurring (days)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="medicine : ${addToPlan}">
+                    <td th:text="${medicine.name}"></td>
+                    <td th:text="${medicine.company}"></td>
+                    <td th:text="${medicine.time_till_expiry}"></td>
+                    <td><input type="number" min="1" max="365" value="7"></td>
+                    <td th:attr="data-medid=${medicine.med_id}, data-supid=${supId}"><button onclick="plan_add(this)">✅</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button onclick="back()">Back</button>
+    </body>
+
+    <script th:inline="javascript">
+
+        window.onload = calculateStatus;
+
+        function calculateStatus() {
+            const rows = document.querySelectorAll('.plan-body tr');
+    
+            rows.forEach(row => {
+                const recurring = parseInt(row.querySelector('td:nth-child(4)').innerText);
+                const lastUpdateDateStr = row.querySelector('td:nth-child(5)').innerText;
+                const lastUpdateDate = new Date(lastUpdateDateStr);
+                const nextUpdateDate = new Date(lastUpdateDate);
+                const todayDate = new Date();
+                nextUpdateDate.setDate(lastUpdateDate.getDate() + recurring);
+
+                const differenceInTime = nextUpdateDate.getTime() - todayDate.getTime();
+                const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+
+                let statusMessage;
+                if (differenceInDays > 0) {
+                    statusMessage = `After ${differenceInDays} day(s)`;
+                } else if (differenceInDays < 0) {
+                    statusMessage = `${Math.abs(differenceInDays)} day(s) ago`;
+                } else {
+                    statusMessage = "Today";
+                }
+
+                row.querySelector('.status').innerText = statusMessage;
+            });
+        }
+
+        function back() {
+            window.location.assign("/");
+        }
+
+        function plan_add(button) {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const recurring = button.parentNode.parentNode.querySelector('input[type="number"]').value;
+            const add_med_id = button.parentNode.getAttribute('data-medid');
+            const add_sup_id = button.parentNode.getAttribute('data-supid');
+            const mapToSend = {"add-med-id" : add_med_id, "recurring" : recurring, "add-sup-id" : add_sup_id}
+
+            fetch('/owner/supplier/add-plan', {
+                method: 'POST',
+                headers: {
+                    [header]: token,
+                    'charset': 'UTF-8',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mapToSend),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data["message"]) {
+                    alert("Added Plan")
+                } else {
+                    alert("Could not add plan")
+                }
+                window.location.assign(`/owner/supplier/plan?sup_id=${add_sup_id}`);
+            })
+            .catch(e => {
+                console.error(e);
+            })
+        }
+
+        function plan_date_update(button) {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const update_med_id = button.parentNode.getAttribute('data-medid');
+            const update_sup_id = button.parentNode.getAttribute('data-supid');
+            const mapToSend = {"update-med-id" : update_med_id, "update-sup-id" : update_sup_id}
+
+            fetch('/owner/supplier/update-plan', {
+                method: 'POST',
+                headers: {
+                    [header]: token,
+                    'charset': 'UTF-8',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mapToSend),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data["message"]) {
+                    alert("Updated Plan")
+                } else {
+                    alert("Could not update plan")
+                }
+                window.location.assign(`/owner/supplier/plan?sup_id=${update_sup_id}`);
+            })
+            .catch(e => {
+                console.error(e);
+            })
+        }
+
+        function plan_delete(button) {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const delete_med_id = button.parentNode.getAttribute('data-medid');
+            const delete_sup_id = button.parentNode.getAttribute('data-supid');
+            const mapToSend = {"delete-med-id" : delete_med_id, "delete-sup-id" : delete_sup_id}
+
+            fetch('/owner/supplier/delete-plan', {
+                method: 'POST',
+                headers: {
+                    [header]: token,
+                    'charset': 'UTF-8',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mapToSend),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data["message"]) {
+                    alert("Deleted Plan")
+                } else {
+                    alert("Could not delete plan")
+                }
+                window.location.assign(`/owner/supplier/plan?sup_id=${delete_sup_id}`);
+            })
+            .catch(e => {
+                console.error(e);
+            })
+        }
+
+    </script>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Profile</title>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>Your Profile -</h1>
+        <div>username : <span th:text="${username}"></span></div>
+        <div>first name : <span><input class="first_name_div" type="text" id="first_name" th:field="${employee.first_name}"></input></span></div>
+        <div>last name : <span><input class="last_name_div" type="text" id="last_name" th:field="${employee.last_name}"></input></span></div>
+        <div>address : <span><input class="address_div" type="text" id="address" th:field="${employee.address}"></input></span></div>
+        <div>date of joining : <span th:text="${employee.date_of_joining}"></span></div>
+        <div>role : <span th:text="${employee.emp_role}"></span></div>
+        <div>salary : <span th:text="${employee.salary}"></span></div>
+        <button onclick="profile_update()">Update</button>
+        <button onclick="back()">Back</button>
+
+        <div><a href="/update-password">Update Password</a></div>
+        <div><a href="/registered-emails">Emails</a></div>
+        <div><a href="/registered-phones">Phones</a></div>
+    </body>
+
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+
+        function profile_update() {
+            const first_name = document.querySelector(".first_name_div").value;
+            const last_name = document.querySelector(".last_name_div").value;
+            const address = document.querySelector(".address_div").value;
+            const employee = /*[[${employee}]]*/ {};
+            const mapToSend = {"id": employee.id, "username" : employee.username, "password" : employee.password, "role" : employee.role, "date_of_joining" : employee.date_of_joining, "emp_role" : employee.emp_role, "salary" : employee.salary, "first_name": first_name, "last_name": last_name, "address": address}
+
+            if(first_name.length>0 && address.length>0 && last_name.length>0) {
+
+                const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                fetch('/employee/profile', {
+                    method: 'POST',
+                    headers: {
+                        [header]: token,
+                        'charset': 'UTF-8',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(mapToSend),
+                }).then(res => res.json())
+                .then(data => {
+                    if(data["message"]) {
+                        window.location.assign("/employee/home");
+                    } else {
+                        window.location.assign("/employee/profile");
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+            }
+        }
+    </script>
+</html>

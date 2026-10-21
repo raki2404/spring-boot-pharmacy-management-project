@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Medicines</title>
+        <meta name="description" content="">
+    </head>
+    <body>
+        <h1>List of Medicines</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Price</th>
+                    <th>Utility</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="medicine : ${medicines}">
+                    <td th:text="${medicine.name}">Medicine Name</td>
+                    <td th:text="${medicine.company}">Company Name</td>
+                    <td th:text="${medicine.sprice}">Price</td>
+                    <td th:text="${medicine.utility}">Utility</td>
+                </tr>
+            </tbody>
+        </table>
+        <button onclick="back()">Back</button>
+    </body>
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+    
+    </script>
+</html>

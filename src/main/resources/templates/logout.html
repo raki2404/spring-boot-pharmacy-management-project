@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Logout</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h2>Logout</h2>
+        <p>Are you sure?</p>
+        <form  method="post" th:action="@{/logout}">
+            <input type="submit" value="Logout">
+        </form>
+        <button onclick="back()">Back</button>
+    </body>
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+
+    </script>
+</html>

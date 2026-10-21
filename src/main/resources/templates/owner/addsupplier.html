@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | AddSupplier</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h2>Supplier Details</h2>
+        <form action='#' th:action='@{/owner/addsupplier}' method="post" th:object='${supplier}'>
+            <label for="name">Name:</label><br>
+            <input type="text" th:field="*{name}"><br><br>
+            <label for="address">Address:</label><br>
+            <input type="text" th:field="*{address}"><br><br>
+            <label for="phone">Phone:</label><br>
+            <input type="text" th:field="*{phone}"><br><br>
+            <label for="email">Email:</label><br>
+            <input type="text" th:field="*{email}"><br><br>
+            <input type="submit" value="AddSupplier">
+        </form>
+        <button onclick="back()">Back</button>
+    </body>
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+
+    </script>
+</html>

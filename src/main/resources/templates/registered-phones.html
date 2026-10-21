@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Phones</title>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>Registered Phones -</h1>
+        <table>
+            <tr th:each="phone : ${phones}">
+                <td th:text="${phone}"></td>
+                <td th:attr="data-phone=${phone}" ><button onclick="phone_delete(this)">❌</button></td>
+            </tr>
+        </table>
+        <div>new phone : <span><input class="new_phone" type="phone" id="new-email"></input></span></div>
+        <button onclick="phone_add()">Add</button>
+        <button onclick="back()">Back</button>
+    </body>
+
+    <script th:inline="javascript">
+
+        function validatePhone(phone) {
+            var re = /^\d{10}$/;
+            return re.test(phone);
+        }
+
+        function back() {
+            window.location.assign("/");
+        }
+
+        function phone_delete(button) {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const delete_phone = button.parentNode.getAttribute('data-phone');
+            const mapToSend = {"delete-phone" : delete_phone}
+
+            fetch('/delete-phone', {
+                method: 'POST',
+                headers: {
+                    [header]: token,
+                    'charset': 'UTF-8',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mapToSend),
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data["message"])
+                window.location.assign("/registered-phones");
+            })
+            .catch(e => {
+                console.error(e);
+            })
+
+        }
+
+        function phone_add() {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const new_phone = document.querySelector(".new_phone").value;
+            const mapToSend = {"new-phone" : new_phone}
+
+            if(new_phone.length==10 && validatePhone(new_phone)) {
+
+                fetch('/add-phone', {
+                    method: 'POST',
+                    headers: {
+                        [header]: token,
+                        'charset': 'UTF-8',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(mapToSend),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data["message"])
+                    window.location.assign("/registered-phones");
+                })
+                .catch(e => {
+                    console.error(e);
+                })
+            } else {
+                alert("Bad Phone")
+            }
+        }
+
+    </script>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Suppliers</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>List of Suppliers</h1>
+        <div th:each="supplier : ${suppliers}">
+            <p><strong>Name:</strong> <span th:text="${supplier.name}"></span></p>
+            <p><strong>Address:</strong> <span th:text="${supplier.address}"></span></p>
+            <p><strong>Email:</strong> <span th:text="${supplier.email}"></span></p>
+            <p><strong>Phone:</strong> <span th:text="${supplier.phone}"></span></p>
+            <div>
+                <a th:href="@{/owner/supplier/update(sup_id=${supplier.sup_id})}">Update Supplier</a>
+            </div>
+            <div>
+                <a th:href="@{/owner/supplier/plan(sup_id=${supplier.sup_id})}">Supplier Plan</a>
+            </div>
+        </div>
+        <div><br><a href="/owner/addsupplier">Add Supplier</a></div>
+        <button onclick="back()">Back</button>
+    </body>
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+
+    </script>
+</html>

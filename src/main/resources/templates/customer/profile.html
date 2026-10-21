@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Profile</title>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>Your Profile -</h1>
+        <div>username : <span th:text="${username}"></span></div>
+        <div>name : <span><input class="name_div" type="text" id="name" th:field="${customer.name}"></input></span></div>
+        <div>address : <span><input class="address_div" type="text" id="address" th:field="${customer.address}"></input></span></div>
+        <button onclick="profile_update()">Update</button>
+        <button onclick="back()">Back</button>
+
+        <div><a href="/update-password">Update Password</a></div>
+        <div><a href="/registered-emails">Emails</a></div>
+        <div><a href="/registered-phones">Phones</a></div>
+    </body>
+
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+
+        function profile_update() {
+            const name = document.querySelector(".name_div").value;
+            const address = document.querySelector(".address_div").value;
+            const customer = /*[[${customer}]]*/ {};
+            const mapToSend = {"id": customer.id, "username" : customer.username, "password" : customer.password, "role" : customer.role, "name": name, "address": address}
+
+            if(name.length>0 && address.length>0) {
+
+                const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                fetch('/customer/profile', {
+                    method: 'POST',
+                    headers: {
+                        [header]: token,
+                        'charset': 'UTF-8',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(mapToSend),
+                }).then(res => res.json())
+                .then(data => {
+                    if(data["message"]) {
+                        window.location.assign("/customer/home");
+                    } else {
+                        window.location.assign("/customer/profile");
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+            }
+        }
+    </script>
+</html>

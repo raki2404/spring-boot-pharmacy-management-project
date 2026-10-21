@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | SignUp</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h2>SignUp</h2>
+        <form action='#' th:action='@{/signup}' method="post" th:object='${customer}'>
+            <label for="username">Username:</label><br>
+            <input type="text" th:field="*{username}"><br><br>
+            <label for="password">Password:</label><br>
+            <input type="password" th:field="*{password}"><br><br>
+            <label for="username">Name:</label><br>
+            <input type="text" th:field="*{name}"><br><br>
+            <label for="username">Address:</label><br>
+            <input type="text" th:field="*{address}"><br><br>
+            <input type="submit" value="SignUp">
+        </form>
+        <button onclick="back()">Back</button>
+    </body>
+    <script th:inline="javascript">
+
+        function back() {
+            window.location.assign("/");
+        }
+
+    </script>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Pharmacy | Emails</title>
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <h1>Registered Emails -</h1>
+        <table>
+            <tr th:each="email : ${emails}">
+                <td th:text="${email}"></td>
+                <td th:attr="data-email=${email}" ><button onclick="email_delete(this)">❌</button></td>
+            </tr>
+        </table>
+        <div>new email : <span><input class="new_email" type="email" id="new-email"></input></span></div>
+        <button onclick="email_add()">Add</button>
+        <button onclick="back()">Back</button>
+    </body>
+
+    <script th:inline="javascript">
+
+        function validateEmail(email) {
+            var re = /\S+@\S+\.\S+/;
+            return re.test(email);
+        }
+
+        function back() {
+            window.location.assign("/");
+        }
+
+        function email_delete(button) {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const delete_email = button.parentNode.getAttribute('data-email');
+            const mapToSend = {"delete-email" : delete_email}
+
+            fetch('/delete-email', {
+                method: 'POST',
+                headers: {
+                    [header]: token,
+                    'charset': 'UTF-8',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mapToSend),
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data["message"])
+                window.location.assign("/registered-emails");
+            })
+            .catch(e => {
+                console.error(e);
+            })
+
+        }
+
+        function email_add() {
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+            const new_email = document.querySelector(".new_email").value;
+            const mapToSend = {"new-email" : new_email}
+
+            if(new_email.length>0 && validateEmail(new_email)) {
+
+                fetch('/add-email', {
+                    method: 'POST',
+                    headers: {
+                        [header]: token,
+                        'charset': 'UTF-8',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(mapToSend),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data["message"])
+                    window.location.assign("/registered-emails");
+                })
+                .catch(e => {
+                    console.error(e);
+                })
+            } else {
+                alert("Bad Email")
+            }
+        }
+
+    </script>
+</html>

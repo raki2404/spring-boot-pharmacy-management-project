@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Inventory</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+
+<h1>Inventory</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Medicine</th>
+            <th>Price</th>
+            <th>Available Stock</th>
+            <th>Date of Manufacture</th>
+            <th>Expiry from Manufacture</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="inventory : ${inventory}">
+            <td th:text="${inventory.name}"></td>
+            <td th:text="${inventory.sprice}"></td>
+            <td th:text="${inventory.quantity}"></td>
+            <td th:text="${inventory.date_of_man}"></td>
+            <td th:text="${inventory.time_till_expiry}"></td>
+            <td>
+                <button th:onclick="|decrementQuantity('${inventory.inv_id}')|">-</button>
+                <span th:id="'quantity-' + ${inventory.inv_id}" 
+                    th:text="${cart[inventory.inv_id] != null} ? ${cart[inventory.inv_id]} : 0"></span>
+                <button th:onclick="|incrementQuantity('${inventory.inv_id}', '${inventory.quantity}')|">+</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<button onclick="checkout()">Checkout</button>
+<button onclick="back()">Back</button>
+
+<script th:inline="javascript">
+
+    function back() {
+        window.location.assign("/");
+    }
+
+    let cart = /*[[${cart}]]*/ {};  // Correctly retrieves the current cart from the session
+
+    document.querySelectorAll('[id^="quantity-"]').forEach(element => {
+        const invId = element.id.split('-')[1];
+        const quantity = cart[invId] || 0;  // Default to 0 if not present
+        element.textContent = quantity;  // Set initial quantity in the UI
+    });
+
+    function incrementQuantity(invId, stock) {
+        const quantityElement = document.getElementById('quantity-' + invId);
+        let currentQuantity = parseInt(quantityElement.textContent);
+
+        if (currentQuantity < stock) {
+            currentQuantity++;
+            quantityElement.textContent = currentQuantity;
+            updateCart(invId, currentQuantity);
+        } else {
+            alert('Cannot add more than available stock.');
+        }
+    }
+
+    function decrementQuantity(invId) {
+        const quantityElement = document.getElementById('quantity-' + invId);
+        let currentQuantity = parseInt(quantityElement.textContent);
+
+        if (currentQuantity > 0) {
+            currentQuantity--;
+            quantityElement.textContent = currentQuantity;
+            updateCart(invId, currentQuantity);
+        }
+    }
+
+    function updateCart(invId, quantity) {
+        if (quantity > 0) {
+            cart[invId] = quantity; // Update quantity in the cart
+        } else {
+            delete cart[invId]; // Remove item from cart if quantity is 0
+        }
+        console.log(cart); // Log current cart state
+
+        // Send the updated cart to the server via an AJAX request
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+
+        fetch('/cart/update', {
+            method: 'POST',
+            headers: {
+                [header]: token,
+                'charset': 'UTF-8',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cart),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data["message"]);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+    function checkout() {
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+        fetch('/cart/checkout', {
+            method: 'POST',
+            headers: {
+                [header]: token,
+                'charset': 'UTF-8',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data["message"]){
+                window.location.assign("/customer/home");
+            }
+            else{
+                window.location.assign("/customer/inventory");
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+</script>
+
+</body>
+</html>

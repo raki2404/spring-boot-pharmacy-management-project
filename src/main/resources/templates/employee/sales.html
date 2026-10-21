@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Inventory</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+
+<h1>Pending Sales</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Customer</th>
+            <th>Address</th>
+            <th>Date of Order</th>
+            <th>Total Amount</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="instance : ${pendingSales}">
+            <td th:text="${instance.key.sale_id}"></td>
+            <td th:text="${instance.value.name}"></td>
+            <td th:text="${instance.value.address}"></td>
+            <td th:text="${instance.key.date_of_sale}"></td>
+            <td th:text="${instance.key.total_amount}"></td>
+            <td>
+                <button th:onclick="|finishOrder('${instance.key.sale_id}')|">Finish Order</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<button onclick="back()">Back</button>
+
+<script th:inline="javascript">
+
+    function back() {
+        window.location.assign("/");
+    }
+    
+    function finishOrder(saleId){
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        const mapToSend = {"sale_id" : saleId};
+
+        fetch('/employee/sales', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'charset': 'UTF-8',
+                [header]: token
+            },
+            body: JSON.stringify(mapToSend),
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data["message"])
+            window.location.assign("/employee/sales");
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+</body>
+</html>
